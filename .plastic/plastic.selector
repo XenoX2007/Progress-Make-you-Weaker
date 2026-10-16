@@ -1,0 +1,4 @@
+repository "ProgressMakeUWeaker/ProgressMakeUWeaker@18967786137959@cloud"
+  path "/"
+    br "/main"
+    co "/main"
