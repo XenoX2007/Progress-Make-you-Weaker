@@ -1,33 +1,21 @@
+using System.Collections;
 using UnityEngine;
 
 public class ShowTextAtAngle : MonoBehaviour
 {
-    [SerializeField] Camera targetCamera;
     [SerializeField] GameObject textObject;
-    [SerializeField] float showAtAngle = 19.44f;
+    [SerializeField] float delaySeconds = 2f;
 
-    bool shown;
-
-    void Start()
+    IEnumerator Start()
     {
-        if (targetCamera == null)
-            targetCamera = Camera.main;
-
-        if (textObject != null)
-            textObject.SetActive(false);
-    }
-
-    void Update()
-    {
-        if (shown || targetCamera == null || textObject == null) return;
-
-        float angle = Mathf.DeltaAngle(0f, targetCamera.transform.eulerAngles.x);
-
-        if (angle <= showAtAngle)
+        if (textObject == null)
         {
-            textObject.SetActive(true);
-            shown = true;
-            Debug.Log($"Đã hiện Text. Góc X camera: {angle:F3}°");
+            Debug.LogError("Hãy gán Text Object trong Inspector.");
+            yield break;
         }
+
+        textObject.SetActive(false);
+        yield return new WaitForSeconds(delaySeconds);
+        textObject.SetActive(true);
     }
 }
