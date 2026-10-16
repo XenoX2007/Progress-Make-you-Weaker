@@ -1,44 +1,84 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Movement : MonoBehaviour
 {
-    [SerializeField] float moveForce = 30f;
-    [SerializeField] float rotationSpeed = 5f;
+    [Header("Movement")]
+    [SerializeField] private float moveForce = 30f;
+    [SerializeField] private float rotationSpeed = 5f;
+
+    [Header("Stand Up")]
+    [SerializeField] private float standUpSpeed = 2f;
+
+    [Header("Jump")]
+    [SerializeField] private float jumpForce = 8f;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundCheckRadius = 0.2f;
+    [SerializeField] private LayerMask groundLayer;
 
     private Rigidbody rb;
+    private bool isGrounded;
 
-    void Awake()
+    private void Awake()
     {
-        rb = GetComponent<Rigidbody>()asdsdffsdg}
-    // This is to make the player feel rotate towards the direction of movement
-       if(input.magnitude > 0.1f)
-{
-    Quaternion target =
-        Quaternion.LookRotation(input);
+        rb = GetComponent<Rigidbody>();
+    }
 
-    transform.rotation =
-        Quaternion.Slerp(
-            transform.rotation,
-            target,fsdgsdfgsd
-            rotationSpeed* Time.deltaTime);
-}
-// This is to make the player feel upright
-Vector3 uprightTorque =
-    Vector3.Cross(
-        transform.up,
-        Vector3.up);
+    private void Update()
+    {
+        isGrounded = Physics.CheckSphere(
+            groundCheck.position,
+            groundCheckRadius,
+            groundLayer);
 
-rb.AddTorque(
-    uprightTorque * 100f);
-// This is to make the player feel like it has some drag
-void FixedUpdate()
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
+            rb.AddForce(
+                Vector3.up * jumpForce,
+                ForceMode.Impulse);
+           
+        }
+    }
+
+    private void FixedUpdate()
     {
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
 
         Vector3 input = new Vector3(h, 0f, v).normalized;
 
-        rb.AddForce(input * moveForce, ForceMode.Acceleration);
+        // Movement
+        rb.AddForce(
+            input * moveForce,
+            ForceMode.Acceleration);
+
+        // Turn towards movement direction
+        if (input.magnitude > 0.1f)
+        {
+            Quaternion targetRotation =
+                Quaternion.LookRotation(input);
+
+            rb.MoveRotation(
+                Quaternion.Slerp(
+                    rb.rotation,
+                    targetRotation,
+                    rotationSpeed * Time.fixedDeltaTime));
+        }
+        if (rb.linearVelocity.y < 0)
+        {
+            rb.AddForce(Vector3.down * 20f, ForceMode.Acceleration);
+        }
+
+        // Slowly return upright
+        Quaternion uprightRotation = Quaternion.Euler(
+            0f,
+            rb.rotation.eulerAngles.y,
+            0f);
+
+        rb.MoveRotation(
+            Quaternion.Slerp(
+                rb.rotation,
+                uprightRotation,
+                standUpSpeed * Time.fixedDeltaTime));
     }
- 
 }
